@@ -20,51 +20,15 @@ from dotenv import load_dotenv
 from streamlit_navigation_bar import st_navbar
 from html_templates import css, bot_template, user_template
 
-from pdf2image import convert_from_bytes
-import fitz  # PyMuPDF
-import base64
-import tempfile
-import re
-
-torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)]
+torch.classes.__path__ = []
 
 def get_pdf_text(docs):
     text = ""
-    all_equations = []
-    inline_eq_pattern = r'\$(.+?)\$'
-    display_eq_pattern = r'\\\[(.+?)\\\]'
     for document in docs:
         reader = PdfReader(document)
         for page in reader.pages:
-            page_text = page.extract_text()
-            text += page_text
-            inline_eqs = re.findall(inline_eq_pattern, page_text)
-            display_eqs = re.findall(display_eq_pattern, page_text)
-            all_equations.extend(inline_eqs + display_eqs)
-    st.session_state.detected_equations = all_equations
+            text += page.extract_text()
     return text
-
-def extract_images_and_tables(docs):
-    extracted = []
-    for doc in docs:
-        doc.seek(0)
-        pdf = fitz.open(stream=doc.read(), filetype="pdf")
-        for page_index in range(len(pdf)):
-            page = pdf[page_index]
-            images = page.get_images(full=True)
-            for img_index, img in enumerate(images):
-                xref = img[0]
-                base_image = pdf.extract_image(xref)
-                image_bytes = base_image["image"]
-                img_b64 = base64.b64encode(image_bytes).decode("utf-8")
-                mime = base_image['ext']
-                extracted.append(f"<img src='data:image/{mime};base64,{img_b64}' style='max-width: 100%;'>")
-
-            tables = page.find_tables()
-            for table in tables:
-                matrix_text = str(table["matrix"]) if isinstance(table, dict) and "matrix" in table else str(table)
-                extracted.append(f"<pre>{matrix_text}</pre>")
-    return extracted
 
 def get_text_chunks(text, chunk_size=1000, chunk_overlap=200):
     text_splitter = CharacterTextSplitter(
@@ -78,6 +42,7 @@ def get_text_chunks(text, chunk_size=1000, chunk_overlap=200):
 
 def get_vectorstore(text_chunks):
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
     vectorstore = FAISS.from_texts(text_chunks, embedding=embeddings)
     return vectorstore
 
@@ -86,16 +51,17 @@ def get_conversation_chain(vectorstore):
     memory = ConversationBufferMemory(
         memory_key="chat_history",
         return_messages=True,
-        output_key="answer"
+        output_key="answer"  # 👈 Tell memory what output to store
     )
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=vectorstore.as_retriever(search_kwargs={"k": 1}),
         memory=memory,
         return_source_documents=True,
-        output_key="answer"
+        output_key="answer"  # 👈 Must match memory
     )
     return conversation_chain
+
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -103,32 +69,23 @@ def handle_userinput(user_question):
 
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
-            st.write(user_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
         else:
-            st.write(bot_template.replace("{{MSG}}", message.content), unsafe_allow_html=True)
+            st.write(bot_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
 
-    if "media_content" in st.session_state:
-        for html in st.session_state.media_content:
-            st.markdown(html, unsafe_allow_html=True)
-
-    if "detected_equations" in st.session_state:
-        st.markdown("### Extracted Equations")
-        for eq in st.session_state.detected_equations:
-            st.latex(eq)  # Already clean LaTeX equations
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="Chat with multiple PDFs", page_icon=":books:")
+    st.set_page_config(page_title="Chat with multiple PDFs",
+                        page_icon=":books:")
     st.write(css, unsafe_allow_html=True)
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = None
-    if "media_content" not in st.session_state:
-        st.session_state.media_content = []
-    if "detected_equations" not in st.session_state:
-        st.session_state.detected_equations = []
 
     st.header("Chat with multiple PDFs :books:")
     user_question = st.text_input("Ask a question about your documents:")
@@ -137,7 +94,8 @@ def main():
 
     with st.sidebar:
         st.subheader("Your documents")
-        pdf_docs = st.file_uploader("Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
+        pdf_docs = st.file_uploader(
+            "Upload your PDFs here and click on 'Process'", accept_multiple_files=True)
         if st.button("Process"):
             with st.spinner("Processing"):
                 # get pdf text
@@ -149,11 +107,10 @@ def main():
                 # create vector store
                 vectorstore = get_vectorstore(text_chunks)
 
-                # extract and cache images/tables
-                st.session_state.media_content = extract_images_and_tables(pdf_docs)
-
                 # create conversation chain
-                st.session_state.conversation = get_conversation_chain(vectorstore)
+                st.session_state.conversation = get_conversation_chain(
+                    vectorstore)
+
 
 if __name__ == '__main__':
     main()
