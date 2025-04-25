@@ -1,4 +1,10 @@
-# Chat with Multiple PDFs
+## Contents:
+1. [RAG Chat App](#Chat-with-Multiple-PDFs)
+2. [TinyGPT](#Train-Your-Own-TinyGPT-Model)
+
+
+## Chat with Multiple PDFs
+<a name="Chat-with-Multiple-PDFs"></a>
 
 This project is a Streamlit-based application that empowers users to upload multiple PDF documents and engage with their content through an intuitive conversational interface. By harnessing the power of Natural Language Processing (NLP) and Machine Learning, the application intelligently extracts text, images, tables, and equations from your PDFs, allowing you to ask questions and instantly retrieve pertinent information.
 
@@ -63,4 +69,72 @@ This project is a Streamlit-based application that empowers users to upload mult
 * **Business:** Efficiently analyze and retrieve key data points from business reports, contracts, and other crucial documents.
 * **Education:** Enhance your learning experience by interactively engaging with textbooks, lecture notes, and study materials.
 
-This project showcases the transformative potential of integrating NLP, machine learning, and interactive web applications to deliver a seamless and powerful document analysis experience.
+
+## Train Your Own TinyGPT Model
+<a name="Train-Your-Own-TinyGPt-Model"></a>
+
+This project is a Streamlit-based application that empowers users to train their very own lightweight GPT-like language model using custom text data. The application provides an intuitive and interactive interface for every step of the process, from uploading your training data and configuring model parameters to generating text with your newly trained model.
+
+## Key Features
+
+* **Custom Model Training:**
+    * Effortlessly upload your training data in either markdown or plain text file formats.
+    * Trains a simplified GPT-like language model leveraging a transformer-based architecture.
+    * Offers a range of configurable hyperparameters to tailor the model to your specific needs.
+
+* **Interactive Hyperparameter Tuning:**
+    * Fine-tune crucial hyperparameters through an easy-to-use graphical interface.
+    * Adjust settings such as embedding dimensions, the number of attention heads, the number of layers, the learning rate, and the dropout rate to optimize model performance.
+
+* **Text Generation:**
+    * Unleash the power of your trained model by providing custom prompts and generating novel text.
+    * Control the characteristics of the generated text using adjustable settings for maximum tokens and temperature (influencing randomness).
+
+* **Model Persistence:**
+    * Save your trained models, along with their associated vocabulary and hyperparameter configurations, for convenient future use.
+    * Easily select and load previously trained models directly from the application sidebar.
+
+* **Batch Data Processing:**
+    * Efficiently handles large text datasets by intelligently splitting them into distinct training and validation sets.
+    * Supports batching during the training process with configurable block sizes to optimize resource utilization.
+
+* **Transformer-Based Architecture:**
+    * Implements a streamlined GPT-like architecture incorporating essential components such as multi-head attention mechanisms, feedforward layers, and positional embeddings.
+    * Includes a sophisticated token generation mechanism enabling autoregressive text generation capabilities.
+
+* **Real-Time Training Feedback:**
+    * Stay informed about the training progress with dynamic, real-time updates on both training and validation losses.
+    * Visualize the training trajectory with a live loss chart and monitor progress with an intuitive progress bar.
+
+* **Error Handling and Debugging:**
+    * Features robust error handling mechanisms to gracefully manage potential issues during data preparation, model training, and text generation phases.
+    * Provides detailed debug logs during text generation to aid in troubleshooting and understanding model behavior.
+
+## Technologies Used
+
+* **Streamlit:** The foundation for building the interactive and user-friendly web application interface.
+* **PyTorch:** The powerful deep learning framework used to implement the transformer-based GPT model and the entire training pipeline.
+* **Torch.nn:** Provides the essential building blocks for defining the model's architecture, including attention mechanisms and feedforward layers.
+* **Torch.optim:** Offers various optimization algorithms to efficiently train the model.
+* **JSON and Pickle:** Utilized for reliably saving and loading model states, hyperparameter configurations, and vocabulary.
+
+## How It Works
+
+1.  **Upload Training Data:** Begin by uploading one or more markdown or plain text files through the convenient sidebar file uploader. The application will automatically combine the content of these files to create your training dataset.
+2.  **Configure Model Parameters:** Navigate to the configuration section to adjust the model's hyperparameters. You can customize settings such as the embedding size, the number of layers in the transformer, and the learning rate. Sensible default parameters are provided for a quick start.
+3.  **Train the Model:** Initiate the training process. The application will split your uploaded data into training and validation sets. Real-time feedback on the training progress, including loss metrics and a progress bar, will be displayed.
+4.  **Save and Load Models:** Once training is complete, you can save your trained model along with a timestamp for easy identification and future use. Previously saved models can be effortlessly loaded from the sidebar.
+5.  **Generate Text:** Unleash the creative potential of your trained model by providing a starting prompt in the text generation interface. Experiment with the generation settings, such as temperature and the maximum number of tokens, to fine-tune the output.
+
+## Example Use Cases
+
+* **Custom Chatbots:** Train a lightweight chatbot tailored to specific domains or datasets.
+* **Text Completion:** Develop models capable of generating creative writing prompts, completing sentences, or assisting with content creation.
+* **Educational Tools:** Build small-scale language models for educational purposes, allowing for experimentation and a deeper understanding of language modeling concepts.
+
+
+
+## Use these Apps:
+
+1. Activate venv as: ```slm_env/Scripts/Activate.ps1``` (for Powershell)
+2. Run app as ```streamlit run <app_name>.py ```
